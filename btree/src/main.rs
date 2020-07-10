@@ -48,8 +48,24 @@ fn insert(node: Box<Option<BTreeNode>>, key: u32, val: String) -> Box<Option<BTr
     };
 }
 
+// ノードを検索する
 fn find(node: &Box<Option<BTreeNode>>, key: u32) -> String {
-    "".to_string()
+    return match &**node {
+        None => "No results".to_string(),
+        Some(v) => {
+            if key == v.key {
+                v.val.clone()
+            }
+            // ノードの左側を検索する
+            else if key < v.key {
+                find(&v.left_node, key)
+            }
+            // ノードの右側を検索する
+            else {
+                find(&v.right_node, key)
+            }
+        }
+    }
 }
 
 fn main() {
