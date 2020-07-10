@@ -37,9 +37,11 @@ fn insert(node: Box<Option<BTreeNode>>, key: u32, val: String) -> Box<Option<BTr
         None => Box::new(Some(BTreeNode::new(key, val))),
         Some(v) => {
             let mut target_node = v.clone();
+            // ノードの左側にノードを追加
             if key < target_node.key {
                 target_node.left_node = insert(target_node.left_node, key, val);
             }
+            // ノードの右側にノードを追加
             else {
                 target_node.right_node = insert(target_node.right_node, key, val);
             }
@@ -66,6 +68,11 @@ fn find(node: &Box<Option<BTreeNode>>, key: u32) -> String {
             }
         }
     }
+}
+
+// ノードを削除する
+fn delete(node: &Box<Option<BTreeNode>>, key: u32) -> bool {
+    false
 }
 
 fn main() {
