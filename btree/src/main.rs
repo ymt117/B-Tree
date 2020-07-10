@@ -1,3 +1,5 @@
+// 参考
+// https://qiita.com/0yoyoyo/items/96705669f47ff8f9b70d
 #[derive(Debug)]
 enum BTreeNode {
     Operator {
@@ -5,6 +7,7 @@ enum BTreeNode {
         right_node: Box<BTreeNode>,
     },
     Number {
+        key: u32,
         val: u32,
     },
 }
@@ -18,8 +21,9 @@ fn new_node(left_node: Box<BTreeNode>, right_node: Box<BTreeNode>) -> Box<BTreeN
     node
 }
 
-fn new_node_num(val: u32) -> Box<BTreeNode> {
+fn new_node_num(key: u32, val: u32) -> Box<BTreeNode> {
     let node = BTreeNode::Number {
+        key: key,
         val: val,
     };
     let node = Box::new(node);
