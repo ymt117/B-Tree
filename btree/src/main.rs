@@ -48,20 +48,20 @@ fn insert(node: Box<Option<BTreeNode>>, key: u32, val: String) -> Box<Option<BTr
     };
 }
 
-fn find(key: u32) -> String {
+fn find(node: &Box<Option<BTreeNode>>, key: u32) -> String {
     "".to_string()
 }
 
 fn main() {
-    let tree = BTreeNode::new(1234, "aaa".to_string());
-    println!("{:#?}", tree);
-}
-
-#[test]
-fn test_insert() {
-
 }
 
 #[test]
 fn test_find() {
+    let mut tree = insert(Box::new(None), 1234, "aaa".to_string());
+    tree = insert(tree, 1233, "bbb".to_string());
+    tree = insert(tree, 1235, "ccc".to_string());
+
+    assert_eq!("aaa", find(&tree, 1234));
+    assert_eq!("bbb", find(&tree, 1233));
+    assert_eq!("ccc", find(%tree, 1235));
 }
