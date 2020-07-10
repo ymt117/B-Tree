@@ -1,35 +1,41 @@
-// 参考
-// https://qiita.com/0yoyoyo/items/96705669f47ff8f9b70d
 #[derive(Debug)]
 enum BTreeNode {
     Operator {
-        left_node: Box<BTreeNode>,
-        right_node: Box<BTreeNode>,
+        left_node: Box<Option<BTreeNode>>,
+        right_node: Box<Option<BTreeNode>>,
     },
     Number {
         key: u32,
-        val: u32,
+        val: String,
     },
 }
 
-fn new_node(left_node: Box<BTreeNode>, right_node: Box<BTreeNode>) -> Box<BTreeNode> {
-    let node = BTreeNode::Operator {
-        left_node: left_node,
-        right_node: right_node,
-    };
-    let node = Box::new(node);
-    node
+impl BTreeNode {
+    fn new(key: u32, val: String) -> BTreeNode {
+        BTreeNode::Operator {
+            left_node: Box::new(None),
+            right_node: Box::new(None),
+        };
+
+        BTreeNode::Number {
+            key: key,
+            val: val,
+        }
+    }
 }
 
-fn new_node_num(key: u32, val: u32) -> Box<BTreeNode> {
-    let node = BTreeNode::Number {
-        key: key,
-        val: val,
-    };
-    let node = Box::new(node);
-    node
+fn insert(node: BTreeNode, key: u32, val: String) {
+    
+}
+
+fn find(key: u32) -> String {
+    "".to_string()
 }
 
 fn main() {
     
+}
+
+#[test]
+fn test_find() {
 }
