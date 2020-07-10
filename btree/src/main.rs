@@ -52,19 +52,28 @@ fn insert(node: Box<Option<BTreeNode>>, key: u32, val: String) -> Box<Option<BTr
 
 // ノードを検索する
 fn find(node: &Box<Option<BTreeNode>>, key: u32) -> String {
-    return match &**node {
+    let node = find_node(node, key);
+    return match *node {
         None => "No results".to_string(),
+        Some(node) => node.val
+    }
+}
+
+fn find_node(node: &Box<Option<BTreeNode>>, key: u32) -> Box<Option<BTreeNode>> {
+    return match &**node {
+        None => Box::new(None),
         Some(v) => {
             if key == v.key {
-                v.val.clone()
+                let target_node = v.clone();
+                Box::new(Some(target_node))
             }
             // ノードの左側を検索する
             else if key < v.key {
-                find(&v.left_node, key)
+                find_node(&v.left_node, key)
             }
             // ノードの右側を検索する
             else {
-                find(&v.right_node, key)
+                find_node(&v.right_node, key)
             }
         }
     }
@@ -87,4 +96,6 @@ fn test_find() {
     assert_eq!("aaa", find(&tree, 1234));
     assert_eq!("bbb", find(&tree, 1233));
     assert_eq!("ccc", find(&tree, 1235));
+
+    assert_eq!("No results", find(&tree, 3333));
 }
