@@ -63,5 +63,5 @@ fn test_find() {
 
     assert_eq!("aaa", find(&tree, 1234));
     assert_eq!("bbb", find(&tree, 1233));
-    assert_eq!("ccc", find(%tree, 1235));
+    assert_eq!("ccc", find(&tree, 1235));
 }
