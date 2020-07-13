@@ -1,7 +1,7 @@
 #[derive(Debug)]
 struct BTreeNode {
-    left: Box<Option<BTreeNode>>,
-    right: Box<Option<BTreeNode>>,
+    left:   Box<Option<BTreeNode>>,
+    right:  Box<Option<BTreeNode>>,
     
     key: u32,
     val: String,
@@ -16,6 +16,10 @@ impl Clone for BTreeNode {
             key: self.key,
             val: self.val.clone(),
         }
+    }
+
+    fn clone_from(&mut self, source: &Self) {
+        *self = source.clone();
     }
 }
 
@@ -84,32 +88,69 @@ fn find_node(node: &Box<Option<BTreeNode>>, key: u32) -> Box<Option<BTreeNode>> 
 }
 
 // ノードを削除する
-fn delete(node: &Box<Option<BTreeNode>>, key: u32) -> Box<Option<BTreeNode>> {
+fn remove(node: Box<Option<BTreeNode>>, key: u32) -> Box<Option<BTreeNode>> {
     // 削除のパターン
     // (1) 削除対象のノードが子を持たない
     //     → 削除対象のノードをNoneにする
     // (2) 削除対象のノードが1つの子を持つ
     //     → 削除対象のノードをノードが持つ子で置き換える
     // (3) 削除対象のノードが2つの子を持つ
-    //     → 削除対象のノードを通りがかり順で次にくるノード
-    Box::new(None)
+    //     → 削除対象のノードを通りがかり順で次にくるノード(X)で置き換える
+    //       そのあとXは削除する
+    return match *node {
+        None => panic!(),
+        Some(v) => {
+            let mut target_node = v.clone();
+            // 削除対象のノードを検索
+            if key == target_node.key {
+                // 削除する処理を書く
+                // (1)の場合
+                if target_node.left.is_none() && target_node.right.is_none() {
+                    // target_nodeをNoneで置き換える
+                }
+                // (2)の場合
+                else if target_node.left.is_none() {
+                    // target_nodeをtaget_nodeの子(right)で置き換える
+                    let child_node = target_node.clone();
+                    match &*child_node.right {
+                        None => panic!(),
+                        Some(x) => target_node.clone_from(&x),
+                    }
+                }
+                else if target_node.right.is_none() {
+                    // target_nodeをtarget_nodeの子（left）で置き換える
+                    let child_node = target_node.clone();
+                    match &*child_node.left {
+                        None => panic!(),
+                        Some(x) => target_node.clone_from(&x),
+                    }
+                }
+                // (3)の場合
+            }
+            else if key < target_node.key {
+                target_node.left = remove(target_node.left, key);
+            }
+            else {
+                target_node.right = remove(target_node.right, key);
+            }
+            Box::new(Some(target_node))
+        }
+    }
 }
 
 fn main() {
-    let mut tree = insert(Box::new(None), 10, "10".to_string());
-    tree = insert(tree, 9, "9".to_string());
-    tree = insert(tree, 8, "8".to_string());
-    tree = insert(tree, 11, "11".to_string());
-    tree = insert(tree, 13, "13".to_string());
-    tree = insert(tree, 12, "12".to_string());
-    tree = insert(tree, 11, "replace".to_string());
+    // テスト用ツリーを作成
+    let foo = vec![4, 10, 2, 5, 1, 3, 8, 11, 7, 9, 15];
+    let mut tree = insert(Box::new(None), 6, "6".to_string());
+    for i in foo {
+        tree = insert(tree, i, i.to_string());
+    }
 
     println!("{:#?}", tree);
 
-    let mut tree = Box::new(Some(BTreeNode::new(1, "abc".to_string())));
-    //println!("{:#?}", tree);
-    tree = insert(tree, 3, "hello".to_string());
-    //println!("{:#?}", tree);
+    tree = remove(tree, 11);
+
+    println!("{:#?}", tree);
 }
 
 #[test]
