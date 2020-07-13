@@ -1,7 +1,7 @@
 #[derive(Debug)]
 struct BTreeNode {
-    left_node: Box<Option<BTreeNode>>,
-    right_node: Box<Option<BTreeNode>>,
+    left: Box<Option<BTreeNode>>,
+    right: Box<Option<BTreeNode>>,
     
     key: u32,
     val: String,
@@ -10,8 +10,8 @@ struct BTreeNode {
 impl Clone for BTreeNode {
     fn clone(&self) -> Self {
         BTreeNode {
-            left_node: self.left_node.clone(),
-            right_node: self.right_node.clone(),
+            left: self.left.clone(),
+            right: self.right.clone(),
 
             key: self.key,
             val: self.val.clone(),
@@ -22,8 +22,8 @@ impl Clone for BTreeNode {
 impl BTreeNode {
     fn new(key: u32, val: String) -> BTreeNode {
         BTreeNode {
-            left_node: Box::new(None),
-            right_node: Box::new(None),
+            left: Box::new(None),
+            right: Box::new(None),
 
             key: key,
             val: val,
@@ -37,13 +37,17 @@ fn insert(node: Box<Option<BTreeNode>>, key: u32, val: String) -> Box<Option<BTr
         None => Box::new(Some(BTreeNode::new(key, val))),
         Some(v) => {
             let mut target_node = v.clone();
+            // キーが存在する場合は上書き
+            if key == target_node.key {
+                target_node.val = val;
+            }
             // ノードの左側にノードを追加
-            if key < target_node.key {
-                target_node.left_node = insert(target_node.left_node, key, val);
+            else if key < target_node.key {
+                target_node.left = insert(target_node.left, key, val);
             }
             // ノードの右側にノードを追加
             else {
-                target_node.right_node = insert(target_node.right_node, key, val);
+                target_node.right = insert(target_node.right, key, val);
             }
             Box::new(Some(target_node))
         }
@@ -69,30 +73,43 @@ fn find_node(node: &Box<Option<BTreeNode>>, key: u32) -> Box<Option<BTreeNode>> 
             }
             // ノードの左側を検索する
             else if key < v.key {
-                find_node(&v.left_node, key)
+                find_node(&v.left, key)
             }
             // ノードの右側を検索する
             else {
-                find_node(&v.right_node, key)
+                find_node(&v.right, key)
             }
         }
     }
 }
 
 // ノードを削除する
-fn delete(node: &Box<Option<BTreeNode>>, key: u32) -> bool {
-    false
+fn delete(node: &Box<Option<BTreeNode>>, key: u32) -> Box<Option<BTreeNode>> {
+    // 削除のパターン
+    // (1) 削除対象のノードが子を持たない
+    //     → 削除対象のノードをNoneにする
+    // (2) 削除対象のノードが1つの子を持つ
+    //     → 削除対象のノードをノードが持つ子で置き換える
+    // (3) 削除対象のノードが2つの子を持つ
+    //     → 削除対象のノードを通りがかり順で次にくるノード
+    Box::new(None)
 }
 
 fn main() {
-    let mut tree = insert(Box::new(None), 1234, "aaa".to_string());
-    tree = insert(tree, 1233, "bbb".to_string());
-    tree = insert(tree, 1235, "ccc".to_string());
-    tree = insert(tree, 100, "val 100".to_string());
-    tree = insert(tree, 99, "val 99".to_string());
-    tree = insert(tree, 98, "val 98".to_string());
+    let mut tree = insert(Box::new(None), 10, "10".to_string());
+    tree = insert(tree, 9, "9".to_string());
+    tree = insert(tree, 8, "8".to_string());
+    tree = insert(tree, 11, "11".to_string());
+    tree = insert(tree, 13, "13".to_string());
+    tree = insert(tree, 12, "12".to_string());
+    tree = insert(tree, 11, "replace".to_string());
 
     println!("{:#?}", tree);
+
+    let mut tree = Box::new(Some(BTreeNode::new(1, "abc".to_string())));
+    //println!("{:#?}", tree);
+    tree = insert(tree, 3, "hello".to_string());
+    //println!("{:#?}", tree);
 }
 
 #[test]
