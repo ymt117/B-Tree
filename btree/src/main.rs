@@ -85,6 +85,14 @@ fn delete(node: &Box<Option<BTreeNode>>, key: u32) -> bool {
 }
 
 fn main() {
+    let mut tree = insert(Box::new(None), 1234, "aaa".to_string());
+    tree = insert(tree, 1233, "bbb".to_string());
+    tree = insert(tree, 1235, "ccc".to_string());
+    tree = insert(tree, 100, "val 100".to_string());
+    tree = insert(tree, 99, "val 99".to_string());
+    tree = insert(tree, 98, "val 98".to_string());
+
+    println!("{:#?}", tree);
 }
 
 #[test]
