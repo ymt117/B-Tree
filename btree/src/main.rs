@@ -63,7 +63,7 @@ fn find(node: &Box<Option<BTreeNode>>, key: u32) -> String {
     let node = find_node(node, key);
     return match *node {
         None => "No results".to_string(),
-        Some(node) => node.val
+        Some(node) => format!("Found key: {} val: {}", node.key, node.val)
     }
 }
 
@@ -87,8 +87,18 @@ fn find_node(node: &Box<Option<BTreeNode>>, key: u32) -> Box<Option<BTreeNode>> 
     }
 }
 
-// ノードを削除する
 fn remove(node: Box<Option<BTreeNode>>, key: u32) -> Box<Option<BTreeNode>> {
+    return match *node {
+        None => Box::new(None),
+        Some(v) => {
+            let target_node = v.clone();
+            remove_node(Box::new(Some(target_node)), v, false, key)
+        }
+    }
+}
+
+// ノードを削除する
+fn remove_node(node: Box<Option<BTreeNode>>, mut parent: BTreeNode, is_left: bool, key: u32) -> Box<Option<BTreeNode>> {
     // 削除のパターン
     // (1) 削除対象のノードが子を持たない
     //     → 削除対象のノードをNoneにする
@@ -98,7 +108,7 @@ fn remove(node: Box<Option<BTreeNode>>, key: u32) -> Box<Option<BTreeNode>> {
     //     → 削除対象のノードを通りがかり順で次にくるノード(X)で置き換える
     //       そのあとXは削除する
     return match *node {
-        None => panic!(),
+        None => Box::new(None),
         Some(v) => {
             let mut target_node = v.clone();
             // 削除対象のノードを検索
@@ -107,6 +117,20 @@ fn remove(node: Box<Option<BTreeNode>>, key: u32) -> Box<Option<BTreeNode>> {
                 // (1)の場合
                 if target_node.left.is_none() && target_node.right.is_none() {
                     // target_nodeをNoneで置き換える
+                    if is_left {
+                        parent.left = Box::new(None);
+                        match *parent.left {
+                            None => return Box::new(None),
+                            _ => panic!()
+                        }
+                    }
+                    else {
+                        parent.right = Box::new(None);
+                        match *parent.right {
+                            None => return Box::new(None),
+                            _ => panic!()
+                        }
+                    }
                 }
                 // (2)の場合
                 else if target_node.left.is_none() {
@@ -126,12 +150,20 @@ fn remove(node: Box<Option<BTreeNode>>, key: u32) -> Box<Option<BTreeNode>> {
                     }
                 }
                 // (3)の場合
+                else {
+
+                }
             }
+            // 削除対象のノードが現在のノードより左側にあるとき
             else if key < target_node.key {
-                target_node.left = remove(target_node.left, key);
+                // 左側の子ノードを引数としてremove関数を再帰的に呼ぶ
+                let parent = target_node.clone();
+                target_node.left = remove_node(target_node.left, parent, true, key);
             }
+            // 削除対象のノードが現在のノードより右側にあるとき
             else {
-                target_node.right = remove(target_node.right, key);
+                let parent = target_node.clone();
+                target_node.right = remove_node(target_node.right, parent, false, key);
             }
             Box::new(Some(target_node))
         }
@@ -145,11 +177,10 @@ fn main() {
     for i in foo {
         tree = insert(tree, i, i.to_string());
     }
+    //println!("{:#?}", tree);
 
-    println!("{:#?}", tree);
-
-    tree = remove(tree, 11);
-
+    //println!("Remove tree");
+    tree = remove(tree, 1);
     println!("{:#?}", tree);
 }
 
