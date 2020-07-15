@@ -105,7 +105,7 @@ fn remove_node(node: Box<Option<BTreeNode>>, mut parent: BTreeNode, is_left: boo
     // (2) 削除対象のノードが1つの子を持つ
     //     → 削除対象のノードをノードが持つ子で置き換える
     // (3) 削除対象のノードが2つの子を持つ
-    //     → 削除対象のノードを通りがかり順で次にくるノード(X)で置き換える
+    //     → 削除対象のノードを通りがかり順で次にくるノード(X)で上書き
     //       そのあとXは削除する
     return match *node {
         None => Box::new(None),
@@ -133,6 +133,7 @@ fn remove_node(node: Box<Option<BTreeNode>>, mut parent: BTreeNode, is_left: boo
                     }
                 }
                 // (2)の場合
+                // 左の子を持つ
                 else if target_node.left.is_none() {
                     // target_nodeをtaget_nodeの子(right)で置き換える
                     let child_node = target_node.clone();
@@ -141,6 +142,8 @@ fn remove_node(node: Box<Option<BTreeNode>>, mut parent: BTreeNode, is_left: boo
                         Some(x) => target_node.clone_from(&x),
                     }
                 }
+                // (2)の場合
+                // 右の子を持つ
                 else if target_node.right.is_none() {
                     // target_nodeをtarget_nodeの子（left）で置き換える
                     let child_node = target_node.clone();
@@ -151,7 +154,18 @@ fn remove_node(node: Box<Option<BTreeNode>>, mut parent: BTreeNode, is_left: boo
                 }
                 // (3)の場合
                 else {
-
+                    // 削除対象のノードを上書きするためのノードXを探す
+                    let node_x = serch_preorder(&target_node);
+                    match &*node_x {
+                        None => panic!(),
+                        Some(x) => {
+                            //target_node.clone_from(&x)
+                            //target_node.left = x.left.clone();
+                            target_node.right = x.right.clone();
+                            target_node.key = x.key;
+                            target_node.val = x.val.clone();
+                        }
+                    }
                 }
             }
             // 削除対象のノードが現在のノードより左側にあるとき
@@ -170,6 +184,25 @@ fn remove_node(node: Box<Option<BTreeNode>>, mut parent: BTreeNode, is_left: boo
     }
 }
 
+// ノードの右部分木からノードXを探す
+fn serch_preorder(node: &BTreeNode) -> Box<Option<BTreeNode>> {
+    let tmp = node.clone();
+    let node = tmp.right;
+    return match *node {
+        Some(v) => {
+            let target_node = v.clone();
+            if target_node.left.is_none() {
+                return Box::new(Some(target_node))
+            }
+            else {
+                serch_preorder(&target_node);
+            }
+            Box::new(Some(target_node))
+        },
+        _ => panic!()
+    }
+}
+
 fn main() {
     // テスト用ツリーを作成
     let foo = vec![4, 10, 2, 5, 1, 3, 8, 11, 7, 9, 15];
@@ -177,10 +210,11 @@ fn main() {
     for i in foo {
         tree = insert(tree, i, i.to_string());
     }
-    //println!("{:#?}", tree);
+    println!("{:#?}", tree);
 
-    //println!("Remove tree");
-    tree = remove(tree, 1);
+    println!("Remove tree");
+    tree = remove(tree, 8);
+    tree = remove(tree, 10);
     println!("{:#?}", tree);
 }
 
